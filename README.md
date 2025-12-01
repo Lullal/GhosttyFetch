@@ -67,7 +67,7 @@ Before installation, ensure you have:
 
 ```bash
 # Clone the repository
-git clone [REPOSITORY_URL]
+git clone https://github.com/BarutSRB/GhosttyFetch.git
 cd GhosttyFetch
 
 # Build the application
@@ -331,7 +331,7 @@ This is the maintainer's top priority for contributions. If you have experience 
 
 ### How to Contribute
 
-1. Fork the repository: `[REPOSITORY_URL]`
+1. Fork the repository: `https://github.com/BarutSRB/GhosttyFetch`
 2. Create a feature branch: `git checkout -b feature/your-feature`
 3. Make your changes
 4. Test thoroughly: `zig build-exe ghosttyfetch.zig && ./ghosttyfetch`
@@ -370,7 +370,7 @@ This is the maintainer's top priority for contributions. If you have experience 
 
 MIT License
 
-Copyright (c) 2024 [Your Name]
+Copyright (c) 2024 BarutSRB
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -399,8 +399,8 @@ SOFTWARE.
 
 ## Support
 
-- **Issues & Bug Reports:** `[REPOSITORY_URL]/issues`
-- **Discussions & Questions:** `[REPOSITORY_URL]/discussions`
+- **Issues & Bug Reports:** `https://github.com/BarutSRB/GhosttyFetch/issues`
+- **Discussions & Questions:** `https://github.com/BarutSRB/GhosttyFetch/discussions`
 - **Documentation:** This README and inline code comments
 
 ---

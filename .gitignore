@@ -1,0 +1,19 @@
+# Build artifacts
+ghosttyfetch
+*.o
+*.so
+*.a
+zig-cache/
+zig-out/
+
+# System/IDE files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+.tmp/
