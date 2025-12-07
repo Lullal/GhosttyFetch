@@ -12,7 +12,7 @@ GhosttyFetch combines visual appeal with practical utility, displaying an animat
 
 **Key Features:**
 - 235-frame smooth ASCII art animation
-- Real-time system information display via fastfetch
+- Real-time system information display via native Zig collectors (no fastfetch)
 - Highly customizable colors and gradients
 - Interactive command prompt with live input
 - Built in Zig for performance and efficiency
@@ -29,7 +29,7 @@ GhosttyFetch combines visual appeal with practical utility, displaying an animat
 GhosttyFetch creates an engaging terminal experience by:
 
 1. Loading configuration from `config.json` and environment variables (FPS, colors, gradient settings, system info modules)
-2. Executing fastfetch to gather system information in JSON format
+2. Gathering system information natively using platform APIs (sysctl, /proc, CoreGraphics, etc.)
 3. Loading `animation.json` containing 235 frames of ASCII art with color markup
 4. Rendering the animation with:
    - Custom brand colors for highlighted elements
@@ -49,17 +49,7 @@ Before installation, ensure you have:
 
 - **Operating System:** macOS or Linux (POSIX-compliant systems)
 - **Zig:** Version 0.15.2 or compatible
-- **fastfetch:** Required for system information display
-  ```bash
-  # macOS
-  brew install fastfetch
-
-  # Arch Linux
-  pacman -S fastfetch
-
-  # Ubuntu/Debian
-  apt install fastfetch
-  ```
+- **System utilities (optional):** Some modules call platform tools if present (e.g., `xrandr` for X11 display info, `gsettings` on GNOME).
 
 ## Installation
 
@@ -136,28 +126,24 @@ All configuration is managed through `config.json`, with environment variable ov
 - `white_gradient_scroll` (boolean): Enable animated gradient scrolling
 - `white_gradient_scroll_speed` (float): Scroll speed in lines per second
 
-#### Fastfetch Configuration
+#### System Info Configuration
 
 ```json
 {
-  "fastfetch": {
+  "sysinfo": {
     "enabled": true,
-    "command": "fastfetch",
     "modules": [
       "OS", "Host", "Kernel", "CPU", "GPU",
       "Memory", "Disk", "LocalIp"
-    ],
-    "list_available": false
+    ]
   }
 }
 ```
 
 **Options:**
 - `enabled` (boolean): Enable/disable system information panel
-- `command` (string): Fastfetch executable path or name
-- `modules` (array): List of fastfetch modules to display
+- `modules` (array): List of modules to display
   - Available: Title, OS, Host, Kernel, Uptime, Packages, Shell, Display, Terminal, TerminalFont, WM, WMTheme, Cursor, CPU, GPU, Memory, Swap, Disk, LocalIp
-- `list_available` (boolean): Print available modules to stderr for reference
 
 ### Environment Variables
 
@@ -235,7 +221,7 @@ GHOSTTY_COLOR=#ff0066 ./ghosttyfetch
 
 # Minimal system info (edit config.json)
 {
-  "fastfetch": {
+  "sysinfo": {
     "modules": ["OS", "Kernel", "CPU", "Memory"]
   }
 }
@@ -281,10 +267,9 @@ Here are some community-favorite color schemes:
 
 ### Common Issues
 
-**"fastfetch: command not found"**
-- Install fastfetch via your package manager
-- Verify installation: `which fastfetch`
-- Alternative: Set full path in config.json: `"command": "/usr/local/bin/fastfetch"`
+**System info fields are empty**
+- Some modules rely on platform data being available (e.g., `/proc` on Linux, CoreGraphics on macOS).
+- Ensure optional helpers exist for richer output: `xrandr` on X11, `gsettings` on GNOME.
 
 **"Failed to load config.json"**
 - Ensure the file exists in the working directory
@@ -310,25 +295,6 @@ Here are some community-favorite color schemes:
 
 Contributions are welcome! We appreciate bug fixes, new features, documentation improvements, and creative enhancements.
 
-### Priority: High-Resolution Animation Support
-
-The current `animation.json` is a downsampled version. A high-resolution original exists at:
-
-```
-contribute/original_animation.json
-```
-
-**Challenge:** Implement dynamic terminal size detection and adaptive frame scaling to utilize the high-resolution animation without quality loss.
-
-**Areas of Interest:**
-- ASCII art scaling algorithms
-- Dynamic terminal dimension detection
-- Frame interpolation or adaptive rendering
-- Performance optimization for real-time display
-- Better looking ANSI system information
-
-This is the maintainer's top priority for contributions. If you have experience in these areas, your help would be greatly appreciated!
-
 ### How to Contribute
 
 1. Fork the repository: `https://github.com/BarutSRB/GhosttyFetch`
@@ -349,15 +315,15 @@ This is the maintainer's top priority for contributions. If you have experience 
 
 **Built With:**
 - Language: Zig 0.15.2
-- Dependencies: Zig standard library only
-- Runtime Requirement: fastfetch
+- Dependencies: Zig standard library plus platform APIs (sysctl, CoreGraphics, /proc)
+- Runtime Requirement: None beyond optional helper utilities for richer system info
 
 **Key Features:**
 - Non-blocking terminal I/O for smooth animation
 - Raw terminal mode for keystroke capture
 - ANSI escape code rendering for colors and positioning
 - JSON parsing for configuration and animation data
-- Child process spawning for fastfetch integration
+- Native system information collectors; limited helper commands (e.g., `xrandr`, `gsettings`) when available
 - Smart text wrapping and alignment
 
 **Animation Format:**
@@ -394,7 +360,7 @@ SOFTWARE.
 
 - Animation sourced from [ghostty.org](https://ghostty.org)
 - Built for the Ghostty terminal emulator by Mitchell Hashimoto
-- System information provided by fastfetch
+- System information collected natively in Zig
 - Created for the terminal ricing and customization community
 
 ## Support

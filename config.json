@@ -7,13 +7,10 @@
   "_white_gradient_note": "Colors for non-brand characters, top to bottom. Empty list disables.",
   "_white_gradient_scroll_note": "true scrolls the gradient downward frame by frame.",
   "_white_gradient_scroll_speed_note": "Lines per second to scroll the gradient. Default matches fps.",
-  "_fastfetch_note": "Configure what to show from fastfetch beneath the animation.",
-  "_fastfetch_modules_note": "List of fastfetch module names; empty to skip showing info.",
-  "_fastfetch_list_available_note": "true prints the module names fastfetch reported so you can update fastfetch.modules.",
-  "fastfetch": {
+  "_sysinfo_note": "Configure what to show beneath the animation.",
+  "_sysinfo_modules_note": "List of module names; empty to skip showing info.",
+  "sysinfo": {
     "enabled": true,
-    "command": "fastfetch",
-    "list_available": true,
     "modules": [
       "OS",
       "Host",
