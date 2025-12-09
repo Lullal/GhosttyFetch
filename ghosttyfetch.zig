@@ -5,6 +5,7 @@ const frames = @import("src/frames.zig");
 const sysinfo = @import("src/sysinfo.zig");
 const ui = @import("src/ui.zig");
 const shell = @import("src/shell.zig");
+const resize = @import("src/resize.zig");
 
 const Allocator = types.Allocator;
 const clear_screen = types.clear_screen;
@@ -27,10 +28,12 @@ pub fn main() !void {
     };
     defer config.freeConfig(allocator, cfg);
 
-    const term_size = types.TerminalSize.detect(stdout_file) catch
+    resize.install();
+
+    var term_size = types.TerminalSize.detect(stdout_file) catch
         types.TerminalSize{ .width = 120, .height = 40 };
 
-    const layout = frames.calculateLayout(term_size);
+    var layout = frames.calculateLayout(term_size);
 
     const fps = try config.resolveFps(allocator, cfg);
     const prefs = try config.colorPreferences(allocator, cfg, stdout_file.isTty(), fps);
@@ -42,22 +45,23 @@ pub fn main() !void {
     const raw_frames = try frames.loadRawFrames(allocator);
     defer frames.freeFrames(allocator, raw_frames);
 
-    const scaled_frames = try frames.scaleFramesForLayout(
+    // Use lazy frame cache for instant resize response
+    var frame_cache = try frames.LazyFrameCache.init(
         allocator,
         raw_frames,
         layout.art_width,
         layout.art_height,
+        prefs,
     );
-    defer frames.freeFrames(allocator, scaled_frames);
+    defer frame_cache.deinit();
 
-    const rendered_frames = try frames.renderFrames(allocator, scaled_frames, prefs);
-    defer frames.freeFrames(allocator, rendered_frames);
-
-    const styled_info = try ui.stylizeInfoLines(allocator, sysinfo_lines, layout.info_width, prefs);
+    var styled_info = try ui.stylizeInfoLines(allocator, sysinfo_lines, layout.info_width, prefs);
     defer sysinfo.freeSystemInfoLines(allocator, styled_info);
 
-    const frame_width = frames.maxFrameVisibleWidth(allocator, rendered_frames) catch 0;
-    const info_start_col = frame_width + 4;
+    // Get first frame to calculate initial width
+    const first_frame = try frame_cache.getFrame(0);
+    var frame_width = frames.frameVisibleWidth(first_frame);
+    var info_start_col = frame_width + 4;
     const delay_ns = frames.fpsToDelayNs(fps);
 
     const info_colors = ui.resolveInfoColors(prefs);
@@ -75,14 +79,20 @@ pub fn main() !void {
     defer if (submitted_command) |cmd| allocator.free(cmd);
 
     var keep_running = true;
+    var frame_index: usize = 0;
+
     while (keep_running) {
-        for (rendered_frames) |frame| {
+        frame_index = 0;
+        while (frame_index < frame_cache.frameCount()) : (frame_index += 1) {
             if (submitted_command == null) {
                 submitted_command = try shell.captureInput(allocator, stdin_file, &input_buffer);
             }
 
             const prompt_line = try shell.renderPromptLine(allocator, prompt_prefix, input_buffer.items, info_colors);
             defer allocator.free(prompt_line);
+
+            // Get frame lazily - scales on first access, cached thereafter
+            const frame = try frame_cache.getFrame(frame_index);
 
             const combined = try ui.combineFrameAndInfo(allocator, frame, styled_info, info_start_col);
             defer allocator.free(combined);
@@ -96,6 +106,31 @@ pub fn main() !void {
             if (submitted_command != null) {
                 keep_running = false;
                 break;
+            }
+
+            if (resize.checkAndClear()) {
+                // Re-detect terminal size and calculate new layout
+                const new_term_size = types.TerminalSize.detect(stdout_file) catch
+                    types.TerminalSize{ .width = 120, .height = 40 };
+                const new_layout = frames.calculateLayout(new_term_size);
+
+                // Instant: just invalidate cache and set new dimensions
+                frame_cache.resize(new_layout.art_width, new_layout.art_height);
+
+                // Re-style info panel (this is fast - only ~10-20 lines)
+                const new_styled = try ui.stylizeInfoLines(allocator, sysinfo_lines, new_layout.info_width, prefs);
+                sysinfo.freeSystemInfoLines(allocator, styled_info);
+                styled_info = new_styled;
+
+                term_size = new_term_size;
+                layout = new_layout;
+
+                // Recalculate frame width from first frame after resize
+                const resized_frame = try frame_cache.getFrame(0);
+                frame_width = frames.frameVisibleWidth(resized_frame);
+                info_start_col = frame_width + 4;
+
+                break; // Restart frame loop with new size
             }
 
             std.Thread.sleep(delay_ns);

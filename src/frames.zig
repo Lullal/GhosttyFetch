@@ -797,7 +797,7 @@ pub fn fpsToDelayNs(fps: f64) u64 {
     return 50 * std.time.ns_per_ms;
 }
 
-fn renderFrame(allocator: Allocator, frame: []const u8, prefs: ColorPreferences, frame_index: usize) ![]const u8 {
+pub fn renderFrame(allocator: Allocator, frame: []const u8, prefs: ColorPreferences, frame_index: usize) ![]const u8 {
     const has_span = std.mem.indexOf(u8, frame, span_open) != null;
     const brand_color = if (prefs.enable and prefs.color_code != null) prefs.color_code.? else null;
     const gradient_active = prefs.enable and prefs.gradient.colors.len > 0;
@@ -1004,3 +1004,116 @@ pub fn visibleWidth(text: []const u8) usize {
     }
     return w;
 }
+
+/// Get the maximum visible width of any line in a single frame.
+/// Use this instead of visibleWidth() when measuring multi-line frames.
+pub fn frameVisibleWidth(frame: []const u8) usize {
+    var max: usize = 0;
+    var it = std.mem.splitScalar(u8, frame, '\n');
+    while (it.next()) |line| {
+        const w = visibleWidth(line);
+        if (w > max) max = w;
+    }
+    return max;
+}
+
+/// Lazy frame cache that scales and renders frames on-demand.
+/// This provides instant resize response by deferring frame processing
+/// until each frame is actually needed for display.
+pub const LazyFrameCache = struct {
+    allocator: Allocator,
+    raw_frames: []const []const u8,
+    target_width: usize,
+    target_height: usize,
+    prefs: ColorPreferences,
+    cache: []?[]const u8,
+
+    pub fn init(
+        allocator: Allocator,
+        raw_frames: []const []const u8,
+        initial_width: usize,
+        initial_height: usize,
+        prefs: ColorPreferences,
+    ) !LazyFrameCache {
+        const cache = try allocator.alloc(?[]const u8, raw_frames.len);
+        @memset(cache, null);
+
+        return LazyFrameCache{
+            .allocator = allocator,
+            .raw_frames = raw_frames,
+            .target_width = initial_width,
+            .target_height = initial_height,
+            .prefs = prefs,
+            .cache = cache,
+        };
+    }
+
+    pub fn deinit(self: *LazyFrameCache) void {
+        for (self.cache) |maybe_frame| {
+            if (maybe_frame) |frame| {
+                self.allocator.free(frame);
+            }
+        }
+        self.allocator.free(self.cache);
+    }
+
+    /// Get a frame, scaling and rendering on-demand if not cached.
+    pub fn getFrame(self: *LazyFrameCache, frame_index: usize) ![]const u8 {
+        if (frame_index >= self.cache.len) {
+            return error.FrameIndexOutOfBounds;
+        }
+
+        // Return cached frame if available
+        if (self.cache[frame_index]) |cached_frame| {
+            return cached_frame;
+        }
+
+        // Scale the single frame
+        const scaled = try scaleFrame(
+            self.allocator,
+            self.raw_frames[frame_index],
+            self.target_width,
+            self.target_height,
+        );
+        defer self.allocator.free(scaled);
+
+        // Render the single frame (apply colors)
+        const rendered = try renderFrame(
+            self.allocator,
+            scaled,
+            self.prefs,
+            frame_index,
+        );
+
+        // Store in cache
+        self.cache[frame_index] = rendered;
+
+        return rendered;
+    }
+
+    /// Invalidate cache and set new dimensions. This is instant - no computation.
+    pub fn resize(self: *LazyFrameCache, new_width: usize, new_height: usize) void {
+        // Only invalidate if dimensions actually changed
+        if (new_width == self.target_width and new_height == self.target_height) {
+            return;
+        }
+
+        // Free all cached frames
+        for (self.cache) |maybe_frame| {
+            if (maybe_frame) |frame| {
+                self.allocator.free(frame);
+            }
+        }
+
+        // Reset cache to all null
+        @memset(self.cache, null);
+
+        // Update dimensions
+        self.target_width = new_width;
+        self.target_height = new_height;
+    }
+
+    pub fn frameCount(self: *const LazyFrameCache) usize {
+        return self.raw_frames.len;
+    }
+};
